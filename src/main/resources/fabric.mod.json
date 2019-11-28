@@ -1,0 +1,37 @@
+{
+  "schemaVersion": 1,
+  "id": "bigbuckets",
+  "version": "${version}",
+
+  "name": "Big Buckets",
+  "description": "Adds upgradable buckets.",
+  "authors": [
+    "Willbl3pic"
+  ],
+  "contact": {
+    "homepage": "https://curseforge.com/COMPLETE",
+    "sources": "https://github.com/williambl/bigbuckets-fabric"
+  },
+
+  "license": "MIT",
+  "icon": "assets/logo.png",
+
+  "environment": "*",
+  "entrypoints": {
+    "main": [
+      "com.williambl.bigbuckets.BigBuckets"
+    ]
+  },
+  "mixins": [
+    "modid.mixins.json"
+  ],
+
+  "depends": {
+    "fabricloader": ">=0.4.0",
+    "fabric": "*",
+    "minecraft": "1.14.x"
+  },
+  "suggests": {
+    "flamingo": "*"
+  }
+}
