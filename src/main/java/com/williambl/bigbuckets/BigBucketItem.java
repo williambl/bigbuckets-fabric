@@ -1,39 +1,45 @@
 package com.williambl.bigbuckets;
 
-import net.minecraft.advancements.CriteriaTriggers;
+import net.minecraft.advancement.criterion.Criterions;
 import net.minecraft.block.BlockState;
-import net.minecraft.block.IBucketPickupHandler;
-import net.minecraft.block.ILiquidContainer;
-import net.minecraft.block.material.Material;
-import net.minecraft.client.util.ITooltipFlag;
+import net.minecraft.block.FluidDrainable;
+import net.minecraft.block.FluidFillable;
+import net.minecraft.block.Material;
+import net.minecraft.client.item.TooltipContext;
 import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.entity.player.ServerPlayerEntity;
-import net.minecraft.fluid.FlowingFluid;
+import net.minecraft.fluid.BaseFluid;
 import net.minecraft.fluid.Fluid;
 import net.minecraft.fluid.Fluids;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.particles.ParticleTypes;
-import net.minecraft.stats.Stats;
-import net.minecraft.tags.FluidTags;
-import net.minecraft.util.*;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.particle.ParticleTypes;
+import net.minecraft.server.network.ServerPlayerEntity;
+import net.minecraft.sound.SoundCategory;
+import net.minecraft.sound.SoundEvent;
+import net.minecraft.sound.SoundEvents;
+import net.minecraft.stat.Stats;
+import net.minecraft.tag.FluidTags;
+import net.minecraft.text.LiteralText;
+import net.minecraft.text.Text;
+import net.minecraft.util.ActionResult;
+import net.minecraft.util.Hand;
+import net.minecraft.util.Identifier;
+import net.minecraft.util.TypedActionResult;
+import net.minecraft.util.hit.BlockHitResult;
+import net.minecraft.util.hit.HitResult;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.BlockRayTraceResult;
-import net.minecraft.util.math.RayTraceContext;
-import net.minecraft.util.math.RayTraceResult;
-import net.minecraft.util.text.ITextComponent;
-import net.minecraft.util.text.StringTextComponent;
+import net.minecraft.util.registry.Registry;
 import net.minecraft.world.IWorld;
+import net.minecraft.world.RayTraceContext;
 import net.minecraft.world.World;
-import net.minecraftforge.registries.ForgeRegistries;
 
 import javax.annotation.Nullable;
 import java.util.List;
 
 public class BigBucketItem extends Item {
 
-    public BigBucketItem(Properties builder) {
+    public BigBucketItem(Settings builder) {
         super(builder);
     }
 
@@ -48,55 +54,50 @@ public class BigBucketItem extends Item {
     }
 
     @Override
-    public ActionResult<ItemStack> onItemRightClick(World worldIn, PlayerEntity playerIn, Hand handIn) {
-        ItemStack stack = playerIn.getHeldItem(handIn);
-        RayTraceResult raytraceresult = rayTrace(worldIn, playerIn, this.getFullness(stack) == this.getCapacity(stack) ? RayTraceContext.FluidMode.NONE : RayTraceContext.FluidMode.SOURCE_ONLY);
-        ActionResult<ItemStack> ret = net.minecraftforge.event.ForgeEventFactory.onBucketUse(playerIn, worldIn, stack, raytraceresult);
-        if (ret != null) return ret;
-        if (raytraceresult.getType() == RayTraceResult.Type.MISS) {
-            return new ActionResult<>(ActionResultType.PASS, stack);
-        } else if (raytraceresult.getType() != RayTraceResult.Type.BLOCK) {
-            return new ActionResult<>(ActionResultType.PASS, stack);
+    public TypedActionResult<ItemStack> use(World world, PlayerEntity user, Hand hand) {
+        ItemStack stack = user.getStackInHand(hand);
+        HitResult hitresult = rayTrace(world, user, this.getFullness(stack) == this.getCapacity(stack) ? RayTraceContext.FluidHandling.NONE : RayTraceContext.FluidHandling.SOURCE_ONLY);
+        if (hitresult.getType() == HitResult.Type.MISS) {
+            return new TypedActionResult<>(ActionResult.PASS, stack);
+        } else if (hitresult.getType() != HitResult.Type.BLOCK) {
+            return new TypedActionResult<>(ActionResult.PASS, stack);
         } else {
-            BlockRayTraceResult blockraytraceresult = (BlockRayTraceResult) raytraceresult;
-            BlockPos blockpos = blockraytraceresult.getPos();
-            if (worldIn.isBlockModifiable(playerIn, blockpos) && playerIn.canPlayerEdit(blockpos, blockraytraceresult.getFace(), stack)) {
+            BlockHitResult blockraytraceresult = (BlockHitResult) hitresult;
+            BlockPos blockpos = blockraytraceresult.getBlockPos();
+            if (world.canPlayerModifyAt(user, blockpos) && user.canPlaceOn(blockpos, blockraytraceresult.getSide(), stack)) {
                 if (this.getFullness(stack) != this.getCapacity(stack)) {
-                    BlockState blockstate1 = worldIn.getBlockState(blockpos);
-                    if (blockstate1.getBlock() instanceof IBucketPickupHandler) {
-                        Fluid fluid = ((IBucketPickupHandler) blockstate1.getBlock()).pickupFluid(worldIn, blockpos, blockstate1);
+                    BlockState blockstate1 = world.getBlockState(blockpos);
+                    if (blockstate1.getBlock() instanceof FluidDrainable) {
+                        Fluid fluid = ((FluidDrainable) blockstate1.getBlock()).tryDrainFluid(world, blockpos, blockstate1);
                         if (fluid != Fluids.EMPTY && canAcceptFluid(stack, fluid)) {
-                            playerIn.addStat(Stats.ITEM_USED.get(this));
+                            user.incrementStat(Stats.USED.getOrCreateStat(this));
 
-                            SoundEvent soundevent = this.getFluid(stack).getAttributes().getEmptySound();
-                            if (soundevent == null)
-                                soundevent = fluid.isIn(FluidTags.LAVA) ? SoundEvents.ITEM_BUCKET_FILL_LAVA : SoundEvents.ITEM_BUCKET_FILL;
-                            playerIn.playSound(soundevent, 1.0F, 1.0F);
-                            ItemStack itemstack1 = this.fillBucket(stack, playerIn, fluid);
-                            if (!worldIn.isRemote) {
-                                CriteriaTriggers.FILLED_BUCKET.trigger((ServerPlayerEntity) playerIn, new ItemStack(fluid.getFilledBucket()));
+                            user.playSound(fluid.matches(FluidTags.LAVA) ? SoundEvents.ITEM_BUCKET_FILL_LAVA : SoundEvents.ITEM_BUCKET_FILL, 1.0F, 1.0F);
+                            ItemStack itemstack1 = this.fillBucket(stack, user, fluid);
+                            if (!world.isClient) {
+                                Criterions.FILLED_BUCKET.handle((ServerPlayerEntity) user, new ItemStack(fluid.getBucketItem()));
                             }
 
-                            return new ActionResult<>(ActionResultType.SUCCESS, itemstack1);
+                            return new TypedActionResult<>(ActionResult.SUCCESS, itemstack1);
                         }
                     }
 
                 }
-                BlockState blockstate = worldIn.getBlockState(blockpos);
-                BlockPos blockpos1 = blockstate.getBlock() instanceof ILiquidContainer && this.getFluid(stack) == Fluids.WATER ? blockpos : blockraytraceresult.getPos().offset(blockraytraceresult.getFace());
-                if (this.tryPlaceContainedLiquid(playerIn, worldIn, blockpos1, blockraytraceresult, stack)) {
-                    this.onLiquidPlaced(worldIn, stack, blockpos1);
-                    if (playerIn instanceof ServerPlayerEntity) {
-                        CriteriaTriggers.PLACED_BLOCK.trigger((ServerPlayerEntity) playerIn, blockpos1, stack);
+                BlockState blockstate = world.getBlockState(blockpos);
+                BlockPos blockpos1 = blockstate.getBlock() instanceof FluidDrainable && this.getFluid(stack) == Fluids.WATER ? blockpos : blockraytraceresult.getBlockPos().offset(blockraytraceresult.getSide());
+                if (this.tryPlaceContainedLiquid(user, world, blockpos1, blockraytraceresult, stack)) {
+                    this.onLiquidPlaced(world, stack, blockpos1);
+                    if (user instanceof ServerPlayerEntity) {
+                        Criterions.PLACED_BLOCK.handle((ServerPlayerEntity) user, blockpos1, stack);
                     }
 
-                    playerIn.addStat(Stats.ITEM_USED.get(this));
-                    return new ActionResult<>(ActionResultType.SUCCESS, this.emptyBucket(stack, playerIn));
+                    user.incrementStat(Stats.USED.getOrCreateStat(this));
+                    return new TypedActionResult<>(ActionResult.SUCCESS, this.emptyBucket(stack, user));
                 } else {
-                    return new ActionResult<>(ActionResultType.FAIL, stack);
+                    return new TypedActionResult<>(ActionResult.FAIL, stack);
                 }
             } else {
-                return new ActionResult<>(ActionResultType.FAIL, stack);
+                return new TypedActionResult<>(ActionResult.FAIL, stack);
             }
         }
     }
@@ -116,31 +117,31 @@ public class BigBucketItem extends Item {
         return stack;
     }
 
-    public boolean tryPlaceContainedLiquid(@Nullable PlayerEntity player, World worldIn, BlockPos posIn, @Nullable BlockRayTraceResult raytrace, ItemStack stack) {
-        if (!(this.getFluid(stack) instanceof FlowingFluid)) {
+    public boolean tryPlaceContainedLiquid(@Nullable PlayerEntity player, World worldIn, BlockPos posIn, @Nullable BlockHitResult raytrace, ItemStack stack) {
+        if (!(this.getFluid(stack) instanceof BaseFluid)) {
             return false;
         } else {
             BlockState blockstate = worldIn.getBlockState(posIn);
             Material material = blockstate.getMaterial();
             boolean flag = !material.isSolid();
             boolean flag1 = material.isReplaceable();
-            if (worldIn.isAirBlock(posIn) || flag || flag1 || blockstate.getBlock() instanceof ILiquidContainer && ((ILiquidContainer) blockstate.getBlock()).canContainFluid(worldIn, posIn, blockstate, this.getFluid(stack))) {
-                if (worldIn.dimension.doesWaterVaporize() && this.getFluid(stack).isIn(FluidTags.WATER)) {
+            if (worldIn.isAir(posIn) || flag || flag1 || blockstate.getBlock() instanceof FluidFillable && ((FluidFillable) blockstate.getBlock()).canFillWithFluid(worldIn, posIn, blockstate, this.getFluid(stack))) {
+                if (worldIn.dimension.doesWaterVaporize() && this.getFluid(stack).matches(FluidTags.WATER)) {
                     int i = posIn.getX();
                     int j = posIn.getY();
                     int k = posIn.getZ();
-                    worldIn.playSound(player, posIn, SoundEvents.BLOCK_FIRE_EXTINGUISH, SoundCategory.BLOCKS, 0.5F, 2.6F + (worldIn.rand.nextFloat() - worldIn.rand.nextFloat()) * 0.8F);
+                    worldIn.playSound(player, posIn, SoundEvents.BLOCK_FIRE_EXTINGUISH, SoundCategory.BLOCKS, 0.5F, 2.6F + (worldIn.random.nextFloat() - worldIn.random.nextFloat()) * 0.8F);
 
                     for (int l = 0; l < 8; ++l) {
                         worldIn.addParticle(ParticleTypes.LARGE_SMOKE, (double) i + Math.random(), (double) j + Math.random(), (double) k + Math.random(), 0.0D, 0.0D, 0.0D);
                     }
-                } else if (blockstate.getBlock() instanceof ILiquidContainer && this.getFluid(stack) == Fluids.WATER) {
-                    if (((ILiquidContainer) blockstate.getBlock()).receiveFluid(worldIn, posIn, blockstate, ((FlowingFluid) this.getFluid(stack)).getStillFluidState(false))) {
+                } else if (blockstate.getBlock() instanceof FluidFillable && this.getFluid(stack) == Fluids.WATER) {
+                    if (((FluidFillable) blockstate.getBlock()).tryFillWithFluid(worldIn, posIn, blockstate, ((BaseFluid) this.getFluid(stack)).getStill(false))) {
                         this.playEmptySound(player, worldIn, posIn, stack);
                     }
                 } else {
-                    if (!worldIn.isRemote && (flag || flag1) && !material.isLiquid()) {
-                        worldIn.destroyBlock(posIn, true);
+                    if (!worldIn.isClient && (flag || flag1) && !material.isLiquid()) {
+                        worldIn.breakBlock(posIn, true);
                     }
 
                     this.playEmptySound(player, worldIn, posIn, stack);
@@ -149,67 +150,65 @@ public class BigBucketItem extends Item {
 
                 return true;
             } else {
-                return raytrace != null && this.tryPlaceContainedLiquid(player, worldIn, raytrace.getPos().offset(raytrace.getFace()), null, stack);
+                return raytrace != null && this.tryPlaceContainedLiquid(player, worldIn, raytrace.getBlockPos().offset(raytrace.getSide()), null, stack);
             }
         }
     }
 
     protected void playEmptySound(@Nullable PlayerEntity player, IWorld worldIn, BlockPos pos, ItemStack stack) {
-        SoundEvent soundevent = this.getFluid(stack).getAttributes().getEmptySound();
-        if (soundevent == null)
-            soundevent = this.getFluid(stack).isIn(FluidTags.LAVA) ? SoundEvents.ITEM_BUCKET_EMPTY_LAVA : SoundEvents.ITEM_BUCKET_EMPTY;
+        SoundEvent soundevent = this.getFluid(stack).matches(FluidTags.LAVA) ? SoundEvents.ITEM_BUCKET_EMPTY_LAVA : SoundEvents.ITEM_BUCKET_EMPTY;
         worldIn.playSound(player, pos, soundevent, SoundCategory.BLOCKS, 1.0F, 1.0F);
     }
 
     @Override
-    public void addInformation(ItemStack stack, @Nullable World worldIn, List<ITextComponent> tooltip, ITooltipFlag flagIn) {
-        super.addInformation(stack, worldIn, tooltip, flagIn);
-        tooltip.add(new StringTextComponent("Fluid: ").appendSibling(getFluid(stack).getDefaultState().getBlockState().getBlock().getNameTextComponent()));
-        tooltip.add(new StringTextComponent("Capacity: " + getCapacity(stack)));
-        tooltip.add(new StringTextComponent("Fullness: " + getFullness(stack)));
+    public void appendTooltip(ItemStack stack, @Nullable World worldIn, List<Text> tooltip, TooltipContext flagIn) {
+        super.appendTooltip(stack, worldIn, tooltip, flagIn);
+        tooltip.add(new LiteralText("Fluid: ").append(getFluid(stack).getDefaultState().getBlockState().getBlock().getName()));
+        tooltip.add(new LiteralText("Capacity: " + getCapacity(stack)));
+        tooltip.add(new LiteralText("Fullness: " + getFullness(stack)));
     }
 
     @Override
-    public ITextComponent getDisplayName(ItemStack stack) {
+    public Text getName(ItemStack stack) {
         if (getFluid(stack) == Fluids.EMPTY)
-            return super.getDisplayName(stack);
-        return super.getDisplayName(stack).appendSibling(new StringTextComponent(" (").appendSibling(getFluid(stack).getDefaultState().getBlockState().getBlock().getNameTextComponent()).appendSibling(new StringTextComponent(")")));
+            return super.getName(stack);
+        return super.getName(stack).append(new LiteralText(" (").append(getFluid(stack).getDefaultState().getBlockState().getBlock().getName()).append(new LiteralText(")")));
     }
 
     public Fluid getFluid(ItemStack stack) {
-        CompoundNBT tag = stack.getOrCreateChildTag("BigBuckets");
+        CompoundTag tag = stack.getOrCreateSubTag("BigBuckets");
 
         if (tag.getString("Fluid").equals(""))
             return Fluids.EMPTY;
 
-        ResourceLocation loc = new ResourceLocation(tag.getString("Fluid"));
-        return ForgeRegistries.FLUIDS.getValue(loc);
+        Identifier loc = new Identifier(tag.getString("Fluid"));
+        return Registry.FLUID.get(loc);
     }
 
     public int getCapacity(ItemStack stack) {
-        CompoundNBT tag = stack.getOrCreateChildTag("BigBuckets");
+        CompoundTag tag = stack.getOrCreateSubTag("BigBuckets");
         return tag.getInt("Capacity");
     }
 
     public int getFullness(ItemStack stack) {
-        CompoundNBT tag = stack.getOrCreateChildTag("BigBuckets");
+        CompoundTag tag = stack.getOrCreateSubTag("BigBuckets");
         return tag.getInt("Fullness");
     }
 
     public void setFluid(ItemStack stack, Fluid fluid) {
-        CompoundNBT tag = stack.getOrCreateChildTag("BigBuckets");
+        CompoundTag tag = stack.getOrCreateSubTag("BigBuckets");
 
-        String loc = fluid.getRegistryName().toString();
+        String loc = Registry.FLUID.getId(fluid).toString();
         tag.putString("Fluid", loc);
     }
 
     public void setCapacity(ItemStack stack, int capacity) {
-        CompoundNBT tag = stack.getOrCreateChildTag("BigBuckets");
+        CompoundTag tag = stack.getOrCreateSubTag("BigBuckets");
         tag.putInt("Capacity", capacity);
     }
 
     public void setFullness(ItemStack stack, int fullness) {
-        CompoundNBT tag = stack.getOrCreateChildTag("BigBuckets");
+        CompoundTag tag = stack.getOrCreateSubTag("BigBuckets");
         tag.putInt("Fullness", fullness);
     }
 

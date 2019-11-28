@@ -3,13 +3,13 @@ package com.williambl.bigbuckets;
 import net.minecraft.inventory.CraftingInventory;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
-import net.minecraft.item.crafting.IRecipeSerializer;
-import net.minecraft.item.crafting.SpecialRecipe;
-import net.minecraft.util.ResourceLocation;
+import net.minecraft.recipe.RecipeSerializer;
+import net.minecraft.recipe.SpecialCraftingRecipe;
+import net.minecraft.util.Identifier;
 import net.minecraft.world.World;
 
-public class BigBucketIncreaseCapacityRecipe extends SpecialRecipe {
-    public BigBucketIncreaseCapacityRecipe(ResourceLocation idIn) {
+public class BigBucketIncreaseCapacityRecipe extends SpecialCraftingRecipe {
+    public BigBucketIncreaseCapacityRecipe(Identifier idIn) {
         super(idIn);
     }
 
@@ -18,8 +18,8 @@ public class BigBucketIncreaseCapacityRecipe extends SpecialRecipe {
         int i = 0;
         ItemStack bigBucketStack = ItemStack.EMPTY;
 
-        for (int j = 0; j < inv.getSizeInventory(); ++j) {
-            ItemStack stackInSlot = inv.getStackInSlot(j);
+        for (int j = 0; j < inv.getInvSize(); ++j) {
+            ItemStack stackInSlot = inv.getInvStack(j);
             if (!stackInSlot.isEmpty()) {
                 if (stackInSlot.getItem() == BigBuckets.BIG_BUCKET_ITEM) {
                     if (bigBucketStack.isEmpty())
@@ -40,12 +40,12 @@ public class BigBucketIncreaseCapacityRecipe extends SpecialRecipe {
     }
 
     @Override
-    public ItemStack getCraftingResult(CraftingInventory inv) {
+    public ItemStack craft(CraftingInventory inv) {
         int i = 0;
         ItemStack bigBucketStack = ItemStack.EMPTY;
 
-        for (int j = 0; j < inv.getSizeInventory(); ++j) {
-            ItemStack stackInSlot = inv.getStackInSlot(j);
+        for (int j = 0; j < inv.getInvSize(); ++j) {
+            ItemStack stackInSlot = inv.getInvStack(j);
             if (!stackInSlot.isEmpty()) {
                 if (stackInSlot.getItem() == BigBuckets.BIG_BUCKET_ITEM) {
                     bigBucketStack = stackInSlot.copy();
@@ -61,7 +61,7 @@ public class BigBucketIncreaseCapacityRecipe extends SpecialRecipe {
     }
 
     @Override
-    public IRecipeSerializer<?> getSerializer() {
+    public RecipeSerializer<?> getSerializer() {
         return BigBuckets.BIG_BUCKET_INCREASE_CAPACITY_RECIPE_SERIALIZER;
     }
 
@@ -69,7 +69,7 @@ public class BigBucketIncreaseCapacityRecipe extends SpecialRecipe {
      * Used to determine if this recipe can fit in a grid of the given width/height
      */
     @Override
-    public boolean canFit(int width, int height) {
+    public boolean fits(int width, int height) {
         return width * height >= 2;
     }
 }
