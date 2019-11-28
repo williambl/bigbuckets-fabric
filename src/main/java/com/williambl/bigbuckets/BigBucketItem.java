@@ -75,7 +75,7 @@ public class BigBucketItem extends Item {
                             user.playSound(fluid.matches(FluidTags.LAVA) ? SoundEvents.ITEM_BUCKET_FILL_LAVA : SoundEvents.ITEM_BUCKET_FILL, 1.0F, 1.0F);
                             ItemStack itemstack1 = this.fillBucket(stack, user, fluid);
                             if (!world.isClient) {
-                                Criterions.FILLED_BUCKET.handle((ServerPlayerEntity) user, new ItemStack(fluid.getBucketItem()));
+                                Criterions.FILLED_BUCKET.trigger((ServerPlayerEntity) user, new ItemStack(fluid.getBucketItem()));
                             }
 
                             return new TypedActionResult<>(ActionResult.SUCCESS, itemstack1);
@@ -88,7 +88,7 @@ public class BigBucketItem extends Item {
                 if (this.tryPlaceContainedLiquid(user, world, blockpos1, blockraytraceresult, stack)) {
                     this.onLiquidPlaced(world, stack, blockpos1);
                     if (user instanceof ServerPlayerEntity) {
-                        Criterions.PLACED_BLOCK.handle((ServerPlayerEntity) user, blockpos1, stack);
+                        Criterions.PLACED_BLOCK.trigger((ServerPlayerEntity) user, blockpos1, stack);
                     }
 
                     user.incrementStat(Stats.USED.getOrCreateStat(this));
