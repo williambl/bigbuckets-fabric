@@ -1,5 +1,6 @@
 package com.williambl.bigbuckets;
 
+import com.williambl.bigbuckets.hooks.CustomDurabilityItem;
 import net.minecraft.advancement.criterion.Criterions;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.FluidDrainable;
@@ -37,7 +38,7 @@ import net.minecraft.world.World;
 import javax.annotation.Nullable;
 import java.util.List;
 
-public class BigBucketItem extends Item {
+public class BigBucketItem extends Item implements CustomDurabilityItem {
 
     public BigBucketItem(Settings builder) {
         super(builder);
@@ -214,5 +215,30 @@ public class BigBucketItem extends Item {
 
     public boolean canAcceptFluid(ItemStack stack, Fluid fluid) {
         return getFullness(stack) != getCapacity(stack) && (getFluid(stack) == fluid || getFluid(stack) == Fluids.EMPTY);
+    }
+
+    @Override
+    public boolean shouldShowDurability(ItemStack stack) {
+        return getFluid(stack) != Fluids.EMPTY;
+    }
+
+    @Override
+    public int getMaxDurability(ItemStack stack) {
+        return getCapacity(stack);
+    }
+
+    @Override
+    public int getDurability(ItemStack stack) {
+        return getFullness(stack);
+    }
+
+    @Override
+    public int getDurabilityColor(ItemStack stack) {
+        Fluid fluid = getFluid(stack);
+        if (fluid.matches(FluidTags.WATER))
+            return (79 << 16) | (89 << 8) | 239;
+        if (fluid.matches(FluidTags.LAVA))
+            return (244 << 16) | (34 << 8) | 34;
+        return (34 << 16) | (244 << 8) | 62;
     }
 }
