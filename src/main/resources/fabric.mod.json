@@ -23,12 +23,13 @@
     ]
   },
   "mixins": [
+    "mixins.bigbuckets.json"
   ],
 
   "depends": {
     "fabricloader": ">=0.4.0",
     "fabric": "*",
-    "minecraft": "1.14.x"
+    "minecraft": ">=1.15.2 <1.17"
   },
   "suggests": {
   }

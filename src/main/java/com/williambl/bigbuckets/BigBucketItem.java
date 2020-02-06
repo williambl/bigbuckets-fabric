@@ -1,5 +1,6 @@
 package com.williambl.bigbuckets;
 
+import com.williambl.bigbuckets.hooks.CustomDurabilityItem;
 import net.minecraft.advancement.criterion.Criterions;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.FluidDrainable;
@@ -29,6 +30,7 @@ import net.minecraft.util.TypedActionResult;
 import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.hit.HitResult;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.registry.Registry;
 import net.minecraft.world.IWorld;
 import net.minecraft.world.RayTraceContext;
@@ -37,7 +39,7 @@ import net.minecraft.world.World;
 import javax.annotation.Nullable;
 import java.util.List;
 
-public class BigBucketItem extends Item {
+public class BigBucketItem extends Item implements CustomDurabilityItem {
 
     public BigBucketItem(Settings builder) {
         super(builder);
@@ -75,7 +77,7 @@ public class BigBucketItem extends Item {
                             user.playSound(fluid.matches(FluidTags.LAVA) ? SoundEvents.ITEM_BUCKET_FILL_LAVA : SoundEvents.ITEM_BUCKET_FILL, 1.0F, 1.0F);
                             ItemStack itemstack1 = this.fillBucket(stack, user, fluid);
                             if (!world.isClient) {
-                                Criterions.FILLED_BUCKET.handle((ServerPlayerEntity) user, new ItemStack(fluid.getBucketItem()));
+                                Criterions.FILLED_BUCKET.trigger((ServerPlayerEntity) user, new ItemStack(fluid.getBucketItem()));
                             }
 
                             return new TypedActionResult<>(ActionResult.SUCCESS, itemstack1);
@@ -88,7 +90,7 @@ public class BigBucketItem extends Item {
                 if (this.tryPlaceContainedLiquid(user, world, blockpos1, blockraytraceresult, stack)) {
                     this.onLiquidPlaced(world, stack, blockpos1);
                     if (user instanceof ServerPlayerEntity) {
-                        Criterions.PLACED_BLOCK.handle((ServerPlayerEntity) user, blockpos1, stack);
+                        Criterions.PLACED_BLOCK.trigger((ServerPlayerEntity) user, blockpos1, stack);
                     }
 
                     user.incrementStat(Stats.USED.getOrCreateStat(this));
@@ -214,5 +216,28 @@ public class BigBucketItem extends Item {
 
     public boolean canAcceptFluid(ItemStack stack, Fluid fluid) {
         return getFullness(stack) != getCapacity(stack) && (getFluid(stack) == fluid || getFluid(stack) == Fluids.EMPTY);
+    }
+
+    @Override
+    public boolean shouldShowDurability(ItemStack stack) {
+        return getFluid(stack) != Fluids.EMPTY;
+    }
+
+    @Override
+    public int getMaxDurability(ItemStack stack) {
+        return getCapacity(stack);
+    }
+
+    @Override
+    public int getDurability(ItemStack stack) {
+        return getFullness(stack);
+    }
+
+    @Override
+    public int getDurabilityColor(ItemStack stack) {
+        float f = getDurability(stack);
+        float g = getMaxDurability(stack);
+        float h = Math.max(0.0F, f / g);
+        return MathHelper.hsvToRgb(h / 3.0F, 1.0F, 1.0F);
     }
 }
