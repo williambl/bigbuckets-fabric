@@ -30,6 +30,7 @@ import net.minecraft.util.TypedActionResult;
 import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.hit.HitResult;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.registry.Registry;
 import net.minecraft.world.IWorld;
 import net.minecraft.world.RayTraceContext;
@@ -234,11 +235,9 @@ public class BigBucketItem extends Item implements CustomDurabilityItem {
 
     @Override
     public int getDurabilityColor(ItemStack stack) {
-        Fluid fluid = getFluid(stack);
-        if (fluid.matches(FluidTags.WATER))
-            return (79 << 16) | (89 << 8) | 239;
-        if (fluid.matches(FluidTags.LAVA))
-            return (244 << 16) | (34 << 8) | 34;
-        return (34 << 16) | (244 << 8) | 62;
+        float f = getDurability(stack);
+        float g = getMaxDurability(stack);
+        float h = Math.max(0.0F, f / g);
+        return MathHelper.hsvToRgb(h / 3.0F, 1.0F, 1.0F);
     }
 }
