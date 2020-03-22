@@ -74,7 +74,7 @@ public class BigBucketItem extends Item implements CustomDurabilityItem {
                         if (fluid != Fluids.EMPTY && canAcceptFluid(stack, fluid)) {
                             user.incrementStat(Stats.USED.getOrCreateStat(this));
 
-                            user.playSound(fluid.matches(FluidTags.LAVA) ? SoundEvents.ITEM_BUCKET_FILL_LAVA : SoundEvents.ITEM_BUCKET_FILL, 1.0F, 1.0F);
+                            user.playSound(fluid.isIn(FluidTags.LAVA) ? SoundEvents.ITEM_BUCKET_FILL_LAVA : SoundEvents.ITEM_BUCKET_FILL, 1.0F, 1.0F);
                             ItemStack itemstack1 = this.fillBucket(stack, user, fluid);
                             if (!world.isClient) {
                                 Criterions.FILLED_BUCKET.trigger((ServerPlayerEntity) user, new ItemStack(fluid.getBucketItem()));
@@ -128,7 +128,7 @@ public class BigBucketItem extends Item implements CustomDurabilityItem {
             boolean flag = !material.isSolid();
             boolean flag1 = material.isReplaceable();
             if (worldIn.isAir(posIn) || flag || flag1 || blockstate.getBlock() instanceof FluidFillable && ((FluidFillable) blockstate.getBlock()).canFillWithFluid(worldIn, posIn, blockstate, this.getFluid(stack))) {
-                if (worldIn.dimension.doesWaterVaporize() && this.getFluid(stack).matches(FluidTags.WATER)) {
+                if (worldIn.dimension.doesWaterVaporize() && this.getFluid(stack).isIn(FluidTags.WATER)) {
                     int i = posIn.getX();
                     int j = posIn.getY();
                     int k = posIn.getZ();
@@ -158,7 +158,7 @@ public class BigBucketItem extends Item implements CustomDurabilityItem {
     }
 
     protected void playEmptySound(@Nullable PlayerEntity player, IWorld worldIn, BlockPos pos, ItemStack stack) {
-        SoundEvent soundevent = this.getFluid(stack).matches(FluidTags.LAVA) ? SoundEvents.ITEM_BUCKET_EMPTY_LAVA : SoundEvents.ITEM_BUCKET_EMPTY;
+        SoundEvent soundevent = this.getFluid(stack).isIn(FluidTags.LAVA) ? SoundEvents.ITEM_BUCKET_EMPTY_LAVA : SoundEvents.ITEM_BUCKET_EMPTY;
         worldIn.playSound(player, pos, soundevent, SoundCategory.BLOCKS, 1.0F, 1.0F);
     }
 
