@@ -3,6 +3,7 @@ package com.williambl.bigbuckets;
 import net.fabricmc.api.ModInitializer;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemGroup;
+import net.minecraft.recipe.Recipe;
 import net.minecraft.recipe.RecipeSerializer;
 import net.minecraft.recipe.SpecialRecipeSerializer;
 import net.minecraft.util.Identifier;
@@ -10,17 +11,15 @@ import net.minecraft.util.registry.Registry;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-// The value here should match an entry in the META-INF/mods.toml file
 public class BigBuckets implements ModInitializer {
-    // Directly reference a log4j logger.
     private static final Logger LOGGER = LogManager.getLogger();
 
     public static final String MODID = "bigbuckets";
 
     public static BigBucketItem BIG_BUCKET_ITEM;
 
-    public static RecipeSerializer BIG_BUCKET_RECIPE_SERIALIZER;
-    public static RecipeSerializer BIG_BUCKET_INCREASE_CAPACITY_RECIPE_SERIALIZER;
+    public static RecipeSerializer<Recipe<?>> BIG_BUCKET_RECIPE_SERIALIZER;
+    public static RecipeSerializer<Recipe<?>> BIG_BUCKET_INCREASE_CAPACITY_RECIPE_SERIALIZER;
 
     @Override
     public void onInitialize() {

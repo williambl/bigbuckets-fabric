@@ -18,8 +18,8 @@ public class BigBucketIncreaseCapacityRecipe extends SpecialCraftingRecipe {
         int i = 0;
         ItemStack bigBucketStack = ItemStack.EMPTY;
 
-        for (int j = 0; j < inv.getInvSize(); ++j) {
-            ItemStack stackInSlot = inv.getInvStack(j);
+        for (int j = 0; j < inv.size(); ++j) {
+            ItemStack stackInSlot = inv.getStack(j);
             if (!stackInSlot.isEmpty()) {
                 if (stackInSlot.getItem() == BigBuckets.BIG_BUCKET_ITEM) {
                     if (bigBucketStack.isEmpty())
@@ -44,8 +44,8 @@ public class BigBucketIncreaseCapacityRecipe extends SpecialCraftingRecipe {
         int i = 0;
         ItemStack bigBucketStack = ItemStack.EMPTY;
 
-        for (int j = 0; j < inv.getInvSize(); ++j) {
-            ItemStack stackInSlot = inv.getInvStack(j);
+        for (int j = 0; j < inv.size(); ++j) {
+            ItemStack stackInSlot = inv.getStack(j);
             if (!stackInSlot.isEmpty()) {
                 if (stackInSlot.getItem() == BigBuckets.BIG_BUCKET_ITEM) {
                     bigBucketStack = stackInSlot.copy();
