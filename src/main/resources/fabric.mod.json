@@ -6,7 +6,7 @@
   "name": "Big Buckets",
   "description": "Adds upgradable buckets.",
   "authors": [
-    "Willbl3pic"
+    "Will BL"
   ],
   "contact": {
     "homepage": "https://www.curseforge.com/minecraft/mc-mods/big-buckets-fabric",
@@ -27,9 +27,9 @@
   ],
 
   "depends": {
-    "fabricloader": ">=0.4.0",
+    "fabricloader": "*",
     "fabric": "*",
-    "minecraft": ">=1.15 <1.17"
+    "minecraft": ">=1.16"
   },
   "suggests": {
   }
