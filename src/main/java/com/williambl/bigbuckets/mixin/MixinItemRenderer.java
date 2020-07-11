@@ -2,6 +2,8 @@ package com.williambl.bigbuckets.mixin;
 
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.williambl.bigbuckets.hooks.CustomDurabilityItem;
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
 import net.minecraft.client.font.TextRenderer;
 import net.minecraft.client.render.BufferBuilder;
 import net.minecraft.client.render.Tessellator;
@@ -20,6 +22,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
  * https://github.com/Boundarybreaker/ShulkerCharm/blob/master/src/main/java/space/bbkr/shulkercharm/mixin/MixinItemRenderer.java
  */
 @Mixin(ItemRenderer.class)
+@Environment(EnvType.CLIENT)
 public abstract class MixinItemRenderer {
 
     @Shadow protected abstract void renderGuiQuad(BufferBuilder buffer, int x, int y, int width, int height, int red, int green, int blue, int alpha);

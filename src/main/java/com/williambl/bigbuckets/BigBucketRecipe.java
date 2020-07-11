@@ -17,8 +17,8 @@ public class BigBucketRecipe extends SpecialCraftingRecipe {
    public boolean matches(CraftingInventory inv, World worldIn) {
       int i = 0;
 
-      for (int j = 0; j < inv.getInvSize(); ++j) {
-         ItemStack stackInSlot = inv.getInvStack(j);
+      for (int j = 0; j < inv.size(); ++j) {
+         ItemStack stackInSlot = inv.getStack(j);
          if (!stackInSlot.isEmpty()) {
             if (stackInSlot.getItem() == Items.BUCKET)
                i++;
