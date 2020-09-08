@@ -4,7 +4,7 @@
   "version": "${version}",
 
   "name": "Big Buckets",
-  "description": "Adds upgradable buckets.",
+  "description": "Adds upgradable buckets, compatible with all your favourite fluid-based mods.",
   "authors": [
     "Will BL"
   ],
@@ -14,7 +14,7 @@
   },
 
   "license": "MIT",
-  "icon": "assets/logo.png",
+  "icon": "assets/bigbuckets/textures/bigbucket.png",
 
   "environment": "*",
   "entrypoints": {
@@ -29,7 +29,10 @@
   "depends": {
     "fabricloader": "*",
     "fabric": "*",
-    "minecraft": ">=1.16"
+    "minecraft": ">=1.16",
+    "libblockattributes_core": ">=0.8.0",
+    "libblockattributes_items": ">=0.8.0",
+    "libblockattributes_fluids": ">=0.8.0"
   },
   "suggests": {
   }
