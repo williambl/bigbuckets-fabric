@@ -1,0 +1,6 @@
+{
+  "item.bigbuckets.bigbucket": "большое ведро",
+  "item.bigbuckets.bigbucket.desc.fluid": "Флюид: %s",
+  "item.bigbuckets.bigbucket.desc.capacity": "Вместимость: %d",
+  "item.bigbuckets.bigbucket.desc.fullness": "Полнота: %d"
+}

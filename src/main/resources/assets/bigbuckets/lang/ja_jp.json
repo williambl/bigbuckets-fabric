@@ -1,0 +1,6 @@
+{
+  "item.bigbuckets.bigbucket": "大きい バケツ",
+  "item.bigbuckets.bigbucket.desc.fluid": "流体: %s",
+  "item.bigbuckets.bigbucket.desc.capacity": "容量: %d",
+  "item.bigbuckets.bigbucket.desc.fullness": "充実: %d"
+}

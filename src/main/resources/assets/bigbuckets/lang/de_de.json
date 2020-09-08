@@ -1,0 +1,6 @@
+{
+  "item.bigbuckets.bigbucket": "Großer Eimer",
+  "item.bigbuckets.bigbucket.desc.fluid": "Flüssigkeit: %s",
+  "item.bigbuckets.bigbucket.desc.capacity": "Kapazität: %d",
+  "item.bigbuckets.bigbucket.desc.fullness": "Fülle: %d"
+}

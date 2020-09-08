@@ -1,0 +1,6 @@
+{
+  "item.bigbuckets.bigbucket": "Grande Secchio",
+  "item.bigbuckets.bigbucket.desc.fluid": "Fluido: %s",
+  "item.bigbuckets.bigbucket.desc.capacity": "Capacità: %d",
+  "item.bigbuckets.bigbucket.desc.fullness": "Pienezza: %d"
+}

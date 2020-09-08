@@ -1,0 +1,6 @@
+{
+  "item.bigbuckets.bigbucket": "Granda Sitelo",
+  "item.bigbuckets.bigbucket.desc.fluid": "Fluido: %s",
+  "item.bigbuckets.bigbucket.desc.capacity": "Kapacito: %d",
+  "item.bigbuckets.bigbucket.desc.fullness": "Pleneco: %d"
+}

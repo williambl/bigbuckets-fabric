@@ -1,0 +1,6 @@
+{
+  "item.bigbuckets.bigbucket": "大铁桶",
+  "item.bigbuckets.bigbucket.desc.fluid": "液体: %s",
+  "item.bigbuckets.bigbucket.desc.capacity": "最大容量: %d",
+  "item.bigbuckets.bigbucket.desc.fullness": "已盛装: %d"
+}
