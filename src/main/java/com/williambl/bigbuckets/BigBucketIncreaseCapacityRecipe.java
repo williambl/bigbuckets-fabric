@@ -56,7 +56,7 @@ public class BigBucketIncreaseCapacityRecipe extends SpecialCraftingRecipe {
             }
         }
 
-        BigBuckets.BIG_BUCKET_ITEM.setCapacity(bigBucketStack, BigBuckets.BIG_BUCKET_ITEM.getCapacity(bigBucketStack) + i);
+        BigBuckets.BIG_BUCKET_ITEM.setCapacity(bigBucketStack, BigBuckets.BIG_BUCKET_ITEM.getCapacity(bigBucketStack).add(i));
         return bigBucketStack;
     }
 

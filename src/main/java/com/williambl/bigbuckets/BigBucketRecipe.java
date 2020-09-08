@@ -1,5 +1,6 @@
 package com.williambl.bigbuckets;
 
+import alexiil.mc.lib.attributes.fluid.amount.FluidAmount;
 import net.minecraft.inventory.CraftingInventory;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
@@ -33,7 +34,7 @@ public class BigBucketRecipe extends SpecialCraftingRecipe {
    @Override
    public ItemStack craft(CraftingInventory inv) {
       ItemStack stack = new ItemStack(BigBuckets.BIG_BUCKET_ITEM);
-      stack.getOrCreateSubTag("BigBuckets").putInt("Capacity", 2);
+      BigBuckets.BIG_BUCKET_ITEM.setCapacity(stack, FluidAmount.BUCKET.mul(2));
       return stack;
    }
 
