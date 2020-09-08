@@ -147,7 +147,7 @@ public class BigBucketItem extends Item implements CustomDurabilityItem, Attribu
             FluidVolumeUtil.move(FluidAttributes.EXTRACTABLE.get(stack), tank);
             done = true;
         } else if (getFullness(stack.get()).isGreaterThanOrEqual(FluidAmount.BUCKET)) {
-            if (!world.isClient && blockstate.canBucketPlace(fluid.getRawFluid()) && !blockstate.getMaterial().isLiquid()) {
+            if (!world.isClient && blockstate.canBucketPlace(fluid.getRawFluid()) && !blockstate.getFluidState().isStill()) {
                 if (world.getDimension().isUltrawarm() && fluid.getRawFluid().isIn(FluidTags.WATER)) {
                     world.playSound(player, pos, SoundEvents.BLOCK_FIRE_EXTINGUISH, SoundCategory.BLOCKS, 0.5F, 2.6F + (world.random.nextFloat() - world.random.nextFloat()) * 0.8F);
                     drain(stack, FluidAmount.BUCKET);
