@@ -22,6 +22,7 @@ import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.advancement.criterion.Criteria;
 import net.minecraft.block.BlockState;
+import net.minecraft.block.Blocks;
 import net.minecraft.block.CauldronBlock;
 import net.minecraft.block.FluidFillable;
 import net.minecraft.client.item.TooltipContext;
@@ -181,7 +182,7 @@ public class BigBucketItem extends Item implements CustomDurabilityItem, Attribu
     @Environment(EnvType.CLIENT)
     public void appendTooltip(ItemStack stack, @Nullable World worldIn, List<Text> tooltip, TooltipContext flagIn) {
         super.appendTooltip(stack, worldIn, tooltip, flagIn);
-        tooltip.add(new TranslatableText("item.bigbuckets.bigbucket.desc.fluid", getFluid(stack).name));
+        tooltip.add(new TranslatableText("item.bigbuckets.bigbucket.desc.fluid", getFluidName(getFluid(stack))));
         tooltip.add(new TranslatableText("item.bigbuckets.bigbucket.desc.capacity", getCapacity(stack).toDisplayString()));
         tooltip.add(new TranslatableText("item.bigbuckets.bigbucket.desc.fullness", getFullness(stack).toDisplayString()));
     }
@@ -288,6 +289,12 @@ public class BigBucketItem extends Item implements CustomDurabilityItem, Attribu
     public void addAllAttributes(Reference<ItemStack> stack, LimitedConsumer<ItemStack> excess, ItemAttributeList<?> to) {
         System.out.println(stack.getClass().getName());
         to.offer(new BigBucketTank(stack, excess));
+    }
+
+    private Text getFluidName(FluidKey key) {
+        if (key.isEmpty())
+            return Blocks.AIR.getName();
+        else return key.name;
     }
 
     private class BigBucketTank extends ItemBasedSingleFluidInv {
